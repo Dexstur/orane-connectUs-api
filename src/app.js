@@ -5,11 +5,16 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const connectDB = require('./config/db.config');
 
+
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const adminRouter = require('./routes/admin');
 
 const app = express();
+
+//added port
+
+
 
 connectDB();
 
@@ -45,5 +50,7 @@ app.use(function (err, req, res, next) {
     error: err.message,
   });
 });
+
+
 
 module.exports = app;

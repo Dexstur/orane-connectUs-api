@@ -130,8 +130,68 @@ const signup = async (req, res) => {
   }
 };
 
+//login functionality
 const login = async (req, res) => {
-  //login goes here
+  try {
+    // Validate request body
+    const { error } = loginInfo.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: error.message,
+        error: 'Bad request',
+      });
+    }
+
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'Unauthorized',
+        error: 'Invalid credentials',
+      });
+    }
+
+    // Check if user is verified
+    if (!user.verified) {
+      return res.status(409).json({
+        message: 'Unauthorized',
+        error: 'User not verified',
+      });
+    }
+
+    // Check password
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+        error: 'Invalid credentials',
+      });
+    }
+
+    // Generate token
+    const token = generateToken(user);
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+    });
+
+    // Set header and send response
+    return res.header('Authorization', `Bearer ${token}`).status(200).json({
+      message: 'Login successful',
+      data: user,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
 };
 
 module.exports = { signup, login };
