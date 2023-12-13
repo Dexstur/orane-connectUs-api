@@ -49,7 +49,7 @@ const verifyMail = async (req, res) => {
     await user.save();
 
     //delete token
-    await existingToken.delete();
+    await Token.deleteOne({ _id: existingToken._id });
 
     return res.status(200).json({
       message: `${user.email} verified`,
@@ -99,7 +99,7 @@ const resendMail = async (req, res) => {
     });
 
     if (existingToken) {
-      await existingToken.delete();
+      await Token.deleteOne({ _id: existingToken._id });
     }
 
     //create new token
