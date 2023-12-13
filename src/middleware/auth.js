@@ -1,4 +1,4 @@
-const { validateToken } = require('../utils/jwt');
+const { verifyToken } = require('../utils/jwt');
 
 const auth = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1] || req.cookies.token;
@@ -9,7 +9,7 @@ const auth = (req, res, next) => {
       error: 'No token provided',
     });
   }
-  const decoded = validateToken(token);
+  const decoded = verifyToken(token);
 
   if (!decoded) {
     return res.status(401).json({

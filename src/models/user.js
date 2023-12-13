@@ -25,6 +25,10 @@ const userSchema = new Schema({
     type: Number,
     default: 0,
   },
+  leave: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const User = mongoose.model('User', userSchema);

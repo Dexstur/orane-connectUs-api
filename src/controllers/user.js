@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { config } = require('dotenv');
 const { signupInfo, loginInfo } = require('../utils/validation');
 const dev = require('../utils/log');
+const { generateToken } = require('../utils/jwt');
 
 config();
 
@@ -193,5 +194,16 @@ const login = async (req, res) => {
     });
   }
 };
+
+//run general commands when needed
+function runCommand() {
+  User.find({}).then((users) => {
+    users.forEach(async (user) => {
+      user.leave = false;
+      await user.save();
+      console.log('modified');
+    });
+  });
+}
 
 module.exports = { signup, login };
