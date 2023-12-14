@@ -88,3 +88,84 @@
   ```
 
 ---
+
+#### Operation: View Regular Staff
+
+- **URL:** "/users/regular?page={page}"
+- **Method:** GET
+- **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: View Staff on Leave
+
+- **URL:** "/users/leave?page={page}"
+- **Method:** GET
+- **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: View Admin Staff
+
+- Restricted to admin users
+- **URL:** "/users/admin?page={page}"
+- **Method:** GET
+- **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: View All Staff
+
+- Restricted to admin users
+- **URL:** "/users/all?page={page}"
+- **Method:** GET
+- **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: View All Notifications
+
+- **URL:** "/notice?page={page}"
+- **Method:** GET
+- **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: Create a Notification
+
+- Restricted to admin users
+- **URL:** "/notice"
+- **Method:** POST
+- **Example:**
+  ```json
+  {
+    "title": "Title example",
+    "content": "Content example"
+  }
+  ```
+
+---
+
+#### Operation: Notify Leave of absence
+
+- Restricted to admin users
+- **URL:** "/notice/leave"
+- **Method:** PUT
+- **Example:**
+  ```json
+  {
+    "email": "example@email.com"
+  }
+  ```
+- Grants user with given email leave status
+
+---
+
+#### Operation: Notify Return from leave
+
+- Restricted to admin users
+- **URL:** "/notice/leave/{id}"
+- **Method:** PUT
+- Notify return of user with given id from leave
+
+---
