@@ -22,7 +22,7 @@ const transporter = nodeMailer.createTransport({
 
 function sendMail(options) {
   const mailOptions = {
-    from: user,
+    from: 'admin@warp.dev',
     to: options.receipient,
     subject: options.subject,
     text: options.content,

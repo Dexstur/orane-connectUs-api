@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Token = require('../models/tokens');
+const Notice = require('../models/notice');
 const sendMail = require('../utils/mail');
 const bcrypt = require('bcryptjs');
 const { config } = require('dotenv');
@@ -50,6 +51,12 @@ const verifyMail = async (req, res) => {
 
     //delete token
     await Token.deleteOne({ _id: existingToken._id });
+
+    await Notice.create({
+      title: 'New staff member',
+      content: `${user.fullname}, has joined the team`,
+      user: user._id,
+    });
 
     return res.status(200).json({
       message: `${user.email} verified`,
@@ -199,6 +206,7 @@ const login = async (req, res) => {
     return res.header('Authorization', `Bearer ${token}`).status(200).json({
       message: 'Login successful',
       data: user,
+      token,
     });
   } catch (err) {
     console.error(err.message);
@@ -233,6 +241,7 @@ const registrationToken = async (req, res) => {
     //generate token
     const token = await Token.create({
       purpose: 'Register',
+      token: email,
     });
 
     //delete token after 24 hours
