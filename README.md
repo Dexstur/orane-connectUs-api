@@ -15,6 +15,7 @@
     "email": "exampleadmin@email.com",
     "fullname": "Name Example",
     "password": "enterPassword",
+    "gender": "M or F",
     "adminKey": "company admin key"
   }
   ```
@@ -67,6 +68,7 @@
   {
     "email": "example@email.com",
     "fullname": "Name Example",
+    "gender": "M or F",
     "password": "enterPassword"
   }
   ```

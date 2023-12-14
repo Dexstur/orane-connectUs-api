@@ -22,7 +22,7 @@ const signup = async (req, res) => {
         error: 'Bad request',
       });
     }
-    const { email, password, fullname, adminKey } = req.body;
+    const { email, password, fullname, gender, adminKey } = req.body;
 
     //check if user exists
     const existingUser = await User.findOne({
@@ -64,6 +64,7 @@ const signup = async (req, res) => {
         fullname,
         password: hash,
         email,
+        gender,
         authority: 1,
       });
 
@@ -110,6 +111,7 @@ const signup = async (req, res) => {
         fullname,
         password: hash,
         email,
+        gender,
         authority: 0,
         verified: true,
       });
@@ -199,7 +201,7 @@ const login = async (req, res) => {
 function runCommand() {
   User.find({}).then((users) => {
     users.forEach(async (user) => {
-      user.leave = false;
+      user.gender = 'M';
       await user.save();
       console.log('modified');
     });
