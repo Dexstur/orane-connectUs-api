@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Token = require('../models/tokens');
+const Notice = require('../models/notice');
 const sendMail = require('../utils/mail');
 const bcrypt = require('bcryptjs');
 const { config } = require('dotenv');
@@ -103,6 +104,13 @@ const signup = async (req, res) => {
         });
       }
 
+      if (tokenExists.token !== email) {
+        return res.status(409).json({
+          message: 'Unauthorized',
+          error: 'Invalid token for email',
+        });
+      }
+
       //hash password
       const salt = await bcrypt.genSalt(saltRounds);
       const hash = await bcrypt.hash(password, salt);
@@ -118,6 +126,12 @@ const signup = async (req, res) => {
 
       //delete token
       await Token.findByIdAndDelete(token);
+
+      await Notice.create({
+        title: 'New staff member',
+        content: `${fullname}, has joined the team`,
+        user: newUser._id,
+      });
 
       return res.status(201).json({
         message: 'User created',
@@ -187,6 +201,115 @@ const login = async (req, res) => {
     return res.header('Authorization', `Bearer ${token}`).status(200).json({
       message: 'Login successful',
       data: user,
+      token,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
+const allStaff = async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const limit = 20;
+
+    const data = await User.find({})
+      .limit(limit * 1)
+      .skip((Number(page) - 1) * limit)
+      .exec();
+
+    return res.status(200).json({
+      message: 'All staff',
+      data,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
+const regularStaff = async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const limit = 20;
+
+    const data = await User.find({ authority: 0 })
+      .limit(limit * 1)
+      .skip((Number(page) - 1) * limit)
+      .exec();
+
+    const count = await User.countDocuments({ authority: 0 });
+    const pages = Math.ceil(count / limit);
+    return res.status(200).json({
+      message: 'All staff',
+      data,
+      count,
+      page,
+      pages,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
+const adminStaff = async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const limit = 20;
+
+    const data = await User.find({ authority: 1 })
+      .limit(limit * 1)
+      .skip((Number(page) - 1) * limit)
+      .exec();
+
+    const count = await User.countDocuments({ authority: 1 });
+    const pages = Math.ceil(count / limit);
+    return res.status(200).json({
+      message: 'All staff',
+      data,
+      count,
+      pages,
+      page,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
+const onLeave = async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const limit = 20;
+
+    const data = await User.find({ leave: true })
+      .limit(limit * 1)
+      .skip((Number(page) - 1) * limit)
+      .exec();
+
+    const count = await User.countDocuments({ leave: true });
+    const pages = Math.ceil(count / limit);
+
+    return res.status(200).json({
+      message: 'Users on leave',
+      data,
+      page,
+      pages,
+      count,
     });
   } catch (err) {
     console.error(err.message);
@@ -208,4 +331,4 @@ function runCommand() {
   });
 }
 
-module.exports = { signup, login };
+module.exports = { signup, login, allStaff, regularStaff, adminStaff, onLeave };
