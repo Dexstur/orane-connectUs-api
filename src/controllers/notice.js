@@ -2,9 +2,33 @@ const User = require('../models/user');
 const Notice = require('../models/notice');
 const dev = require('../utils/log');
 
+
+
 const createNotice = async (req, res) => {
   try {
-    //create notice. The user ref will come from the req.user object (req.user.id)
+    const { title, content } = req.body;
+
+    // Check if the user is an admin
+    const userId = req.user.id; 
+    const user = await User.findById(userId);
+    if (!user || user.authority !== 1) {
+      return res.status(403).json({
+        message: 'Forbidden',
+        error: 'Admin only',
+      });
+    }
+
+    // Create notice
+    const notice = await Notice.create({
+      title,
+      content,
+      user: userId,
+    });
+
+    return res.status(201).json({
+      message: 'Notice created',
+      data: notice,
+    });
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -13,6 +37,7 @@ const createNotice = async (req, res) => {
     });
   }
 };
+
 
 const all = async (req, res) => {
   try {
