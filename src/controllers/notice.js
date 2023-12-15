@@ -4,6 +4,7 @@ const dev = require('../utils/log');
 
 
 
+
 const createNotice = async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -11,10 +12,18 @@ const createNotice = async (req, res) => {
     // Check if the user is an admin
     const userId = req.user.id; 
     const user = await User.findById(userId);
-    if (!user || user.authority !== 1) {
+    if (!user || user.authority < 1) {
       return res.status(403).json({
         message: 'Forbidden',
         error: 'Admin only',
+      });
+    }
+
+    // Check if title or content is empty
+    if (!title || title.trim() === '' || !content || content.trim() === '') {
+      return res.status(400).json({
+        message: 'Bad request',
+        error: 'Title and/or content  cannot be empty',
       });
     }
 
@@ -159,4 +168,58 @@ const returnFromLeave = async (req, res) => {
   }
 };
 
-module.exports = { createNotice, all, leaveNotice, returnFromLeave };
+//function to update notice
+
+const updateNotice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    // Check if the user is an admin
+    const userId = req.user.id; 
+    const user = await User.findById(userId);
+    if (!user || user.authority < 1) {
+      return res.status(403).json({
+        message: 'Forbidden',
+        error: 'Admin only',
+      });
+    }
+
+    // Check if title or content is empty
+    if (!title || title.trim() === '' || !content || content.trim() === '') {
+      return res.status(400).json({
+        message: 'Bad request',
+        error: 'Title and/or content cannot be empty',
+      });
+    }
+
+    // Find and update the notice
+    const updatedNotice = await Notice.findByIdAndUpdate(
+      id,
+      { title, content },
+      { new: true }
+    );
+
+    if (!updatedNotice) {
+      return res.status(404).json({
+        message: 'Not found',
+        error: 'Notice not found',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Notice updated',
+      data: updatedNotice,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
+
+
+module.exports = { createNotice, all, leaveNotice, returnFromLeave,updateNotice };
