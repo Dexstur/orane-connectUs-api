@@ -23,4 +23,20 @@ const verifyToken = (token) => {
   }
 };
 
-module.exports = { generateToken, verifyToken };
+const generateKey = (email) => {
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '24h' });
+  const encoded = Buffer.from(token).toString('base64');
+  return encoded;
+};
+
+const verifyKey = (token) => {
+  try {
+    const decrypt = Buffer.from(token, 'base64').toString();
+    const decoded = jwt.verify(decrypt, secretKey);
+    return decoded.email;
+  } catch {
+    return null;
+  }
+};
+
+module.exports = { generateToken, verifyToken, generateKey, verifyKey };

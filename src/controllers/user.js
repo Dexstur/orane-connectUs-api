@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const { config } = require('dotenv');
 const { signupInfo, loginInfo } = require('../utils/validation');
 const dev = require('../utils/log');
-const { generateToken } = require('../utils/jwt');
+const { generateToken, generateKey, verifyKey } = require('../utils/jwt');
 
 config();
 
@@ -64,31 +64,21 @@ const signup = async (req, res) => {
       const newUser = await User.create({
         fullname,
         password: hash,
-        email,
+        email: email.toLowerCase().trim(),
         gender,
         authority: 1,
       });
 
       //create verification token
-      const verifyToken = await Token.create({
-        purpose: 'verify',
-        user: newUser._id,
-      });
+      const verifyToken = generateKey(email.toLowerCase().trim());
 
       sendMail({
         receipient: email,
         subject: 'Connect Us: Verify your account',
-        content: `Click this link to verify your account: http://localhost:3000/verify?token=${verifyToken._id.toString()}`,
+        content: `Click this link to verify your account: http://localhost:3000/verify?token=${verifyToken}`,
       });
 
-      dev.log(verifyToken._id.toString());
-
-      setTimeout(async () => {
-        const exp = await Token.findById(verifyToken._id);
-        if (exp) {
-          await Token.findByIdAndDelete(verifyToken._id);
-        }
-      }, 1000 * 60 * 60 * 24);
+      dev.log(verifyToken);
 
       return res.status(201).json({
         message: 'Admin created',
@@ -96,15 +86,15 @@ const signup = async (req, res) => {
       });
     } else {
       //for user registration
-      const tokenExists = await Token.findById(token);
-      if (!tokenExists) {
+      const storedMail = verifyKey(token);
+      if (!storedMail) {
         return res.status(401).json({
           message: 'Unauthorized',
           error: 'Invalid token',
         });
       }
 
-      if (tokenExists.token !== email) {
+      if (storedMail !== email) {
         return res.status(409).json({
           message: 'Unauthorized',
           error: 'Invalid token for email',
@@ -118,14 +108,11 @@ const signup = async (req, res) => {
       const newUser = await User.create({
         fullname,
         password: hash,
-        email,
+        email: storedMail,
         gender,
         authority: 0,
         verified: true,
       });
-
-      //delete token
-      await Token.findByIdAndDelete(token);
 
       await Notice.create({
         title: 'New staff member',
@@ -214,10 +201,15 @@ const login = async (req, res) => {
 
 const allStaff = async (req, res) => {
   try {
-    const { page = 1 } = req.query;
+    const { page = 1, s = '' } = req.query;
     const limit = 20;
 
-    const data = await User.find({})
+    const data = await User.find({
+      $or: [
+        { fullname: { $regex: s, $options: 'i' } },
+        { email: { $regex: s, $options: 'i' } },
+      ],
+    })
       .limit(limit * 1)
       .skip((Number(page) - 1) * limit)
       .exec();

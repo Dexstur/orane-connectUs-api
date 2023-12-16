@@ -5,7 +5,7 @@ const sendMail = require('../utils/mail');
 const bcrypt = require('bcryptjs');
 const { config } = require('dotenv');
 const { loginInfo } = require('../utils/validation');
-const { generateToken } = require('../utils/jwt');
+const { generateToken, verifyKey, generateKey } = require('../utils/jwt');
 const dev = require('../utils/log');
 
 config();
@@ -20,8 +20,8 @@ const verifyMail = async (req, res) => {
         error: 'No token provided',
       });
     }
-    const existingToken = await Token.findById(token);
-    if (!existingToken) {
+    const storedMail = verifyKey(token);
+    if (!storedMail) {
       return res.status(401).json({
         message: 'Unauthorized',
         error: 'Invalid token',
@@ -29,7 +29,7 @@ const verifyMail = async (req, res) => {
     }
 
     //find user
-    const user = await User.findById(existingToken.user);
+    const user = await User.findOne({ email: storedMail });
 
     if (!user) {
       return res.status(404).json({
@@ -48,9 +48,6 @@ const verifyMail = async (req, res) => {
     //verify user
     user.verified = true;
     await user.save();
-
-    //delete token
-    await Token.deleteOne({ _id: existingToken._id });
 
     await Notice.create({
       title: 'New staff member',
@@ -99,37 +96,17 @@ const resendMail = async (req, res) => {
       });
     }
 
-    //delete existing token
-    const existingToken = await Token.findOne({
-      user: user._id,
-      purpose: 'verify',
-    });
-
-    if (existingToken) {
-      await Token.deleteOne({ _id: existingToken._id });
-    }
-
     //create new token
-    const verifyToken = await Token.create({
-      purpose: 'verify',
-      user: user._id,
-    });
+    const verifyToken = generateKey(email.toLowerCase().trim());
 
     //send email
     sendMail({
-      receipient: email,
+      receipient: email.toLowerCase().trim(),
       subject: 'Connect Us: Verify your account',
-      content: `Click this link to verify your account: http://localhost:3000/verify?token=${verifyToken._id.toString()}`,
+      content: `Click this link to verify your account: http://localhost:3000/verify?token=${verifyToken}`,
     });
 
-    dev.log(verifyToken._id.toString());
-
-    setTimeout(async () => {
-      const exp = await Token.findById(verifyToken._id);
-      if (exp) {
-        await Token.findByIdAndDelete(verifyToken._id);
-      }
-    }, 1000 * 60 * 60 * 24);
+    dev.log(verifyToken);
 
     return res.status(200).json({
       message: 'Verification email sent',
@@ -239,24 +216,13 @@ const registrationToken = async (req, res) => {
     }
 
     //generate token
-    const token = await Token.create({
-      purpose: 'Register',
-      token: email,
-    });
-
-    //delete token after 24 hours
-    setTimeout(async () => {
-      const exp = await Token.findById(token._id);
-      if (exp) {
-        await Token.findByIdAndDelete(token._id);
-      }
-    }, 1000 * 60 * 60 * 24);
+    const token = generateKey(email.trim().toLowerCase());
 
     //send email
     sendMail({
       receipient: email,
       subject: 'Connect Us: Sign up',
-      content: `Click this link to sign up: http://localhost:3000/signup?token=${token._id.toString()}`,
+      content: `Click this link to sign up: http://localhost:3000/sign-up?token=${token}`,
     });
 
     dev.log(token);

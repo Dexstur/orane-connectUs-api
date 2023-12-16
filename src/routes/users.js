@@ -18,7 +18,7 @@ router.get('/', function (req, res, next) {
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.get('/all', [auth, adminAuth], allStaff);
+router.get('/all', auth, allStaff);
 router.get('/regular', auth, regularStaff);
 router.get('/admin', [auth, adminAuth], adminStaff);
 router.get('/leave', auth, onLeave);

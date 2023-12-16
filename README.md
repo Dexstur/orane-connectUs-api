@@ -116,10 +116,9 @@
 
 #### Operation: View All Staff
 
-- Restricted to admin users
-- **URL:** "/users/all?page={page}"
+- **URL:** "/users/all?s={string}&page={page}"
 - **Method:** GET
-- **Query:** page: number eg 1 (optional and defaults to 1)
+- **Query:** page: number eg 1 (optional and defaults to 1); s: string (optional, finds user with name or email matching string pattern. Defaults to '')
 
 ---
 
@@ -167,5 +166,28 @@
 - **URL:** "/notice/leave/{id}"
 - **Method:** PUT
 - Notify return of user with given id from leave
+
+---
+
+#### Operation: Message a user
+
+- **URL:** "/chat/{id}"
+- **Method:** POST
+- **Example:**
+  ```json
+  {
+    "content": "Message example"
+  }
+  ```
+- Sends a message to user with given id
+
+---
+
+#### Operation: Read Messages
+
+- **URL:** "/chat/{id}?page={page}"
+- **Method:** POST
+- **Query:** page: number eg 1 (optional and defaults to 1)
+- Read messages between user with given id
 
 ---
