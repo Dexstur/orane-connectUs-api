@@ -186,7 +186,7 @@
 #### Operation: Read Messages
 
 - **URL:** "/chat/{id}?page={page}"
-- **Method:** POST
+- **Method:** GET
 - **Query:** page: number eg 1 (optional and defaults to 1)
 - Read messages between user with given id
 
