@@ -214,9 +214,19 @@ const allStaff = async (req, res) => {
       .skip((Number(page) - 1) * limit)
       .exec();
 
+    const count = await User.countDocuments({
+      $or: [
+        { fullname: { $regex: s, $options: 'i' } },
+        { email: { $regex: s, $options: 'i' } },
+      ],
+    });
+
+    const pages = Math.ceil(count / limit);
     return res.status(200).json({
       message: 'All staff',
       data,
+      page,
+      pages,
     });
   } catch (err) {
     console.error(err.message);
