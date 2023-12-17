@@ -16,6 +16,10 @@ const noticeSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    system: {
+      type: Boolean,
+      default: true,
+    },
     responses: [
       {
         type: Schema.Types.ObjectId,

@@ -5,7 +5,7 @@ const signupInfo = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required().min(6).max(30),
   gender: Joi.string().valid('M', 'F').required(),
-  adminKey: Joi.string().optional(),
+  adminKey: Joi.string().allow('').optional(),
 });
 
 const loginInfo = Joi.object({
