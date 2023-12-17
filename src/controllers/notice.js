@@ -2,15 +2,12 @@ const User = require('../models/user');
 const Notice = require('../models/notice');
 const dev = require('../utils/log');
 
-
-
-
 const createNotice = async (req, res) => {
   try {
     const { title, content } = req.body;
 
     // Check if the user is an admin
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const user = await User.findById(userId);
     if (!user || user.authority < 1) {
       return res.status(403).json({
@@ -31,6 +28,7 @@ const createNotice = async (req, res) => {
     const notice = await Notice.create({
       title,
       content,
+      system: false,
       user: userId,
     });
 
@@ -46,7 +44,6 @@ const createNotice = async (req, res) => {
     });
   }
 };
-
 
 const all = async (req, res) => {
   try {
@@ -176,7 +173,7 @@ const updateNotice = async (req, res) => {
     const { title, content } = req.body;
 
     // Check if the user is an admin
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const user = await User.findById(userId);
     if (!user || user.authority < 1) {
       return res.status(403).json({
@@ -194,18 +191,27 @@ const updateNotice = async (req, res) => {
     }
 
     // Find and update the notice
-    const updatedNotice = await Notice.findByIdAndUpdate(
-      id,
-      { title, content },
-      { new: true }
-    );
+    const notice = await Notice.findById(id);
 
-    if (!updatedNotice) {
+    if (!notice) {
       return res.status(404).json({
         message: 'Not found',
         error: 'Notice not found',
       });
     }
+
+    if (notice.system) {
+      return res.status(403).json({
+        message: 'Forbidden',
+        error: 'Cannot update system notice',
+      });
+    }
+
+    const updatedNotice = await Notice.findByIdAndUpdate(
+      id,
+      { title, content },
+      { new: true },
+    );
 
     return res.status(200).json({
       message: 'Notice updated',
@@ -220,6 +226,21 @@ const updateNotice = async (req, res) => {
   }
 };
 
+async function runCommand() {
+  const notices = await Notice.find({});
 
+  notices.forEach(async (notice) => {
+    notice.system = true;
+    await notice.save();
+    console.log('modified');
+  });
+}
 
-module.exports = { createNotice, all, leaveNotice, returnFromLeave,updateNotice };
+// runCommand();
+module.exports = {
+  createNotice,
+  all,
+  leaveNotice,
+  returnFromLeave,
+  updateNotice,
+};

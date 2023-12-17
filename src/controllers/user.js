@@ -120,9 +120,17 @@ const signup = async (req, res) => {
         user: newUser._id,
       });
 
+      const secureToken = generateToken(user);
+
+      // Set cookie
+      res.cookie('token', secureToken, {
+        httpOnly: true,
+      });
+
       return res.status(201).json({
         message: 'User created',
         data: newUser,
+        token: secureToken,
       });
     }
   } catch (err) {
