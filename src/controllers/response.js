@@ -2,9 +2,10 @@ const User = require('../models/user');
 const Response = require('../models/response');
 const Notice = require('../models/notice');
 
-const createResponse = async (req, res) => {
+const create = async (req, res) => {
   try {
-    const { content, noticeId } = req.body;
+    const noticeId = req.params.id;
+    const { content } = req.body;
 
     // Check if the user is logged in
     if (!req.user) {
@@ -38,6 +39,9 @@ const createResponse = async (req, res) => {
       notice: noticeId,
     });
 
+    notice.responses.push(response.id);
+    await notice.save();
+
     return res.status(201).json({
       message: 'Response created',
       data: response,
@@ -51,7 +55,7 @@ const createResponse = async (req, res) => {
   }
 };
 
-const deleteResponse = async (req, res) => {
+const deleteOne = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -97,72 +101,81 @@ const deleteResponse = async (req, res) => {
   }
 };
 
+const edit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
 
-const editResponse = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { content } = req.body;
-  
-      // Check if the user is logged in
-      if (!req.user) {
-        return res.status(401).json({
-          message: 'Unauthorized',
-          error: 'You must be logged in to edit a response',
-        });
-      }
-  
-      // Find the response
-      const response = await Response.findById(id);
-      if (!response) {
-        return res.status(404).json({
-          message: 'Not found',
-          error: 'Response not found',
-        });
-      }
-  
-      // Check if the logged-in user is the creator of the response
-      if (response.user.toString() !== req.user.id) {
-        return res.status(403).json({
-          message: 'Forbidden',
-          error: 'You can only edit your own responses',
-        });
-      }
-  
-      // Update the response content
-      response.content = content;
-      await response.save();
-  
-      return res.json({
-        message: 'Response edited',
-        data: response,
-      });
-    } catch (err) {
-      console.error(err.message);
-      return res.status(500).json({
-        message: 'Internal server error',
-        error: err.message,
+    // Check if the user is logged in
+    if (!req.user) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+        error: 'You must be logged in to edit a response',
       });
     }
+
+    // Find the response
+    const response = await Response.findById(id);
+    if (!response) {
+      return res.status(404).json({
+        message: 'Not found',
+        error: 'Response not found',
+      });
+    }
+
+    // Check if the logged-in user is the creator of the response
+    if (response.user.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: 'Forbidden',
+        error: 'You can only edit your own responses',
+      });
+    }
+
+    // Update the response content
+    response.content = content;
+    await response.save();
+
+    return res.json({
+      message: 'Response edited',
+      data: response,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
 };
-  
-const getAllResponses = async (req, res) => {
-    try {
-      const responses = await Response.find({ deleted: { $ne: true } })
-        .populate('user', 'fullname') // Populate the 'user' field with 'fullname'
-        .exec();
-  
-      return res.json({
-        message: 'All responses',
-        data: responses,
-      });
-    } catch (err) {
-      console.error(err.message);
-      return res.status(500).json({
-        message: 'Internal server error',
-        error: err.message,
+
+const getAll = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notice = await Notice.findById(id);
+
+    if (!notice) {
+      return res.status(404).json({
+        message: 'Not found',
+        error: 'Notice not found',
       });
     }
-  };
-  
+    const responses = await Response.find({ notice: id, deleted: false })
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .populate('user', 'fullname') // Populate the 'user' field with 'fullname'
+      .exec();
 
-module.exports = { createResponse, deleteResponse,editResponse ,getAllResponses};
+    return res.json({
+      message: 'All responses',
+      data: responses,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
+module.exports = { create, deleteOne, edit, getAll };

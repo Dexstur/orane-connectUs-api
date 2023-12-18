@@ -6,6 +6,7 @@ const {
   regularStaff,
   adminStaff,
   onLeave,
+  logout,
 } = require('../controllers/user');
 const { auth, adminAuth } = require('../middleware/auth');
 
@@ -22,5 +23,6 @@ router.get('/all', auth, allStaff);
 router.get('/regular', auth, regularStaff);
 router.get('/admin', [auth, adminAuth], adminStaff);
 router.get('/leave', auth, onLeave);
+router.post('/logout', auth, logout);
 
 module.exports = router;
