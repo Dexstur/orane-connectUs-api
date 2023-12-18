@@ -226,6 +226,41 @@ const updateNotice = async (req, res) => {
   }
 };
 
+const viewOne = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notice = await Notice.findById(id)
+      .populate({
+        path: 'responses',
+        populate: {
+          path: 'user',
+          model: 'User',
+          select: 'fullname',
+        },
+      })
+      .exec();
+
+    if (!notice) {
+      return res.status(404).json({
+        message: 'Not found',
+        error: 'Notice not found',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Notice found',
+      data: notice,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
 async function runCommand() {
   const notices = await Notice.find({});
 
@@ -243,4 +278,5 @@ module.exports = {
   leaveNotice,
   returnFromLeave,
   updateNotice,
+  viewOne,
 };

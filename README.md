@@ -30,20 +30,6 @@
 
 ---
 
-#### Operation: Admin login
-
-- **URL:** "/admin/login"
-- **Method:** POST
-- **Example:**
-  ```json
-  {
-    "email": "exampleadmin@email.com",
-    "password": "enterPassword"
-  }
-  ```
-
----
-
 #### Operation: Create registration link
 
 - Admins can create links for users to register. Registration link would be sent to the email provided.
@@ -89,6 +75,13 @@
 
 ---
 
+#### Operation: User Logout
+
+- **URL:** "/users/logout"
+- **Method:** POST
+
+---
+
 #### Operation: View Regular Staff
 
 - **URL:** "/users/regular?page={page}"
@@ -127,6 +120,14 @@
 - **URL:** "/notice?page={page}"
 - **Method:** GET
 - **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: View One Notification
+
+- **URL:** "/notice/{id}"
+- **Method:** GET
+- View single notification
 
 ---
 
@@ -169,6 +170,22 @@
 
 ---
 
+#### Operation: Update Notification
+
+- Restricted to admin users
+- **URL:** "/notice/{id}"
+- **Method:** PUT
+- **Example:**
+  ```json
+  {
+    "title": "Updated Title",
+    "content": "Updated Content"
+  }
+  ```
+- Update a notification. Note: System notifications cannot be updated.
+
+---
+
 #### Operation: Message a user
 
 - **URL:** "/chat/{id}"
@@ -189,5 +206,41 @@
 - **Method:** GET
 - **Query:** page: number eg 1 (optional and defaults to 1)
 - Read messages between user with given id
+
+---
+
+#### Operation: Respond to notification
+
+- **URL:** "/response/{id}"
+- **Method:** POST
+- **Example:**
+  ```json
+  {
+    "content": "Response example"
+  }
+  ```
+- Respond to a notification with given id. Note: id refers to notification's id
+
+---
+
+#### Operation: View notification responses
+
+- **URL:** "/response/{id}"
+- **Method:** GET
+- View all responses for a notification. Note: id refers to notification's id
+
+---
+
+#### Operation: Update response
+
+- **URL:** "/response/{id}"
+- **Method:** PUT
+- **Example:**
+  ```json
+  {
+    "content": "Response update"
+  }
+  ```
+- Update a response. Note: id refers to response's id
 
 ---

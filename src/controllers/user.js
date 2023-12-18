@@ -120,18 +120,21 @@ const signup = async (req, res) => {
         user: newUser._id,
       });
 
-      const secureToken = generateToken(user);
+      const secureToken = generateToken(newUser);
 
       // Set cookie
       res.cookie('token', secureToken, {
         httpOnly: true,
       });
 
-      return res.status(201).json({
-        message: 'User created',
-        data: newUser,
-        token: secureToken,
-      });
+      return res
+        .header('Authorization', `Bearer ${secureToken}`)
+        .status(201)
+        .json({
+          message: 'User created',
+          data: newUser,
+          token: secureToken,
+        });
     }
   } catch (err) {
     console.error(err.message);
@@ -330,6 +333,21 @@ const onLeave = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+    res.clearCookie('token');
+    return res.header('Authorization', '').status(200).json({
+      message: 'Logout successful',
+      data: null,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+    });
+  }
+};
+
 //run general commands when needed
 function runCommand() {
   User.find({}).then((users) => {
@@ -341,4 +359,12 @@ function runCommand() {
   });
 }
 
-module.exports = { signup, login, allStaff, regularStaff, adminStaff, onLeave };
+module.exports = {
+  signup,
+  login,
+  allStaff,
+  regularStaff,
+  adminStaff,
+  onLeave,
+  logout,
+};
