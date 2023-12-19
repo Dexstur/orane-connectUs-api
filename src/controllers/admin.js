@@ -55,9 +55,9 @@ const verifyMail = async (req, res) => {
       user: user._id,
     });
 
-    return res.status(200).json({
-      message: `${user.email} verified`,
-      data: user,
+    return res.render('verify', {
+      title: 'Connect us | Verify',
+      link: 'http://localhost:3000/login',
     });
   } catch (err) {
     console.error(err.message);

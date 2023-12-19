@@ -244,3 +244,34 @@
 - Update a response. Note: id refers to response's id
 
 ---
+
+#### Operation: Give feedback
+
+- **URL:** "/feedback"
+- **Method:** POST
+- **Example:**
+  ```json
+  {
+    "content": "Feedback example"
+  }
+  ```
+- Drop anonymous feedback.
+
+---
+
+#### Operation: Read all feedback
+
+- **URL:** "/feedback?page={page}"
+- **Method:** GET
+- **Query:** page: number eg 1 (optional and defaults to 1)
+
+---
+
+#### Operation: Delete feedback
+
+- Restricted to only admin users
+- **URL:** "/feedback/{id}"
+- **Method:** DELETE
+- Delete feedback of given ID
+
+---
