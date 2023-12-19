@@ -75,7 +75,7 @@ const signup = async (req, res) => {
       sendMail({
         receipient: email,
         subject: 'Connect Us: Verify your account',
-        content: `Click this link to verify your account: http://localhost:3000/verify?token=${verifyToken}`,
+        content: `Click this link to verify your account: http://localhost:8080/admin/verify?token=${verifyToken}`,
       });
 
       dev.log(verifyToken);

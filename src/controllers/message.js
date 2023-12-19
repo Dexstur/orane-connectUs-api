@@ -77,7 +77,7 @@ const readMessages = async (req, res) => {
         { author: user2, recipient: user1 },
       ],
     })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .skip((Number(page) - 1) * limit)
       .limit(limit)
       .exec();
@@ -94,7 +94,7 @@ const readMessages = async (req, res) => {
     return res.json({
       message: 'Messages',
       data: messages,
-      page,
+      page: Number(page),
       pages,
     });
   } catch (err) {
@@ -154,7 +154,5 @@ const deleteMessage = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = { sendMessage, readMessages, deleteMessage };
