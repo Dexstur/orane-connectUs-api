@@ -61,7 +61,7 @@ const all = async (req, res) => {
 
     return res.status(200).json({
       message: 'Notices',
-      data,
+      data: data.reverse(),
       page,
       pages,
     });
