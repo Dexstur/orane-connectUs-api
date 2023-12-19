@@ -3,6 +3,24 @@ const Feedback = require('../models/feedback');
 const create = async (req, res) => {
   try {
     //create a feedback. Feedbacks are anonymous so no user id is needed
+
+    const { content } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({
+        message: 'Bad request',
+        error: 'Content is required',
+      });
+    }
+
+    const feedback = await Feedback.create({
+      content,
+    });
+
+    return res.status(201).json({
+      message: 'Feedback recorded',
+      data: feedback,
+    });
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -44,7 +62,21 @@ const remove = async (req, res) => {
   try {
     const { id } = req.params;
 
-    //no soft delete here. Delete permanently from database
+    const feedback = await Feedback.findById(id);
+
+    if (!feedback) {
+      return res.status(404).json({
+        message: 'Not found',
+        error: 'Feedback not found',
+      });
+    }
+
+    await Feedback.deleteOne({ _id: id });
+
+    return res.json({
+      message: 'Feedback deleted',
+      data: null,
+    });
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
