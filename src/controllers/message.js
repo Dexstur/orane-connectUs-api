@@ -77,7 +77,7 @@ const readMessages = async (req, res) => {
         { author: user2, recipient: user1 },
       ],
     })
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .skip((Number(page) - 1) * limit)
       .limit(limit)
       .exec();
@@ -93,7 +93,7 @@ const readMessages = async (req, res) => {
 
     return res.json({
       message: 'Messages',
-      data: messages,
+      data: messages.reverse(),
       page: Number(page),
       pages,
     });
