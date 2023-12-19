@@ -7,3 +7,5 @@ const router = Router();
 router.post('/', auth, control.create);
 router.get('/', auth, control.read);
 router.delete('/:id', [auth, adminAuth], control.remove);
+
+module.exports = router;
