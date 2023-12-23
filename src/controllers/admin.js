@@ -10,6 +10,9 @@ const dev = require('../utils/log');
 
 config();
 
+const apiUrl = process.env.API_URL;
+const clientUrl = process.env.CLIENT_URL;
+
 const verifyMail = async (req, res) => {
   try {
     //find token
@@ -57,7 +60,7 @@ const verifyMail = async (req, res) => {
 
     return res.render('verify', {
       title: 'Connect us | Verify',
-      link: 'http://localhost:3000/login',
+      link: `${apiUrl}/login`,
     });
   } catch (err) {
     console.error(err.message);
@@ -103,7 +106,7 @@ const resendMail = async (req, res) => {
     sendMail({
       receipient: email.toLowerCase().trim(),
       subject: 'Connect Us: Verify your account',
-      content: `Click this link to verify your account: http://localhost:3000/verify?token=${verifyToken}`,
+      content: `Click this link to verify your account: ${apiUrl}/verify?token=${verifyToken}`,
     });
 
     dev.log(verifyToken);
@@ -222,7 +225,7 @@ const registrationToken = async (req, res) => {
     sendMail({
       receipient: email,
       subject: 'Connect Us: Sign up',
-      content: `Click this link to sign up: http://localhost:3000/sign-up?token=${token}`,
+      content: `Click this link to sign up: ${clientUrl}/sign-up?token=${token}`,
     });
 
     dev.log(token);
