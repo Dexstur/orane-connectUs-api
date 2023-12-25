@@ -12,6 +12,8 @@ config();
 
 const adminSecret = process.env.ADMIN_KEY || '';
 const saltRounds = Number(process.env.SALT_ROUNDS) || 2;
+const apiUrl = process.env.API_URL;
+const clientUrl = process.env.CLIENT_URL;
 
 const signup = async (req, res) => {
   try {
@@ -73,9 +75,9 @@ const signup = async (req, res) => {
       const verifyToken = generateKey(email.toLowerCase().trim());
 
       sendMail({
-        receipient: email,
+        receipient: email.trim().toLowerCase(),
         subject: 'Connect Us: Verify your account',
-        content: `Click this link to verify your account: http://localhost:8080/admin/verify?token=${verifyToken}`,
+        content: `Click this link to verify your account: ${apiUrl}/admin/verify?token=${verifyToken}`,
       });
 
       dev.log(verifyToken);
